@@ -1,10 +1,13 @@
 import React, { useEffect, useState , useMemo} from 'react';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { useFormik } from 'formik';
+// import { ToastContainer, toast } from 'react-toastify';
+// import 'react-toastify/dist/ReactToastify.css';
 import './Todo.css';
 import { Tooltip } from 'react-tooltip';
 import Modal from './Model';
 import debouce from "lodash.debounce";
+import userSchema from './Validation';
+import * as Yup from 'yup';
 
 const Todo = () => {
   const [todo, setTodo] = useState('');
@@ -31,6 +34,30 @@ const Todo = () => {
   const [searchValue, setSearchValue] = useState('');
   const [filteredTodos, setFilteredTodos] = useState([]);
 
+  const formik = useFormik({
+    initialValues: {
+      todo: '',
+    },
+    validationSchema: Yup.object({
+      todo: Yup.string()
+        .required('Todo is required')
+        .test('is-unique', 'This task already exists', function (value) {
+          return !todos.some((task) => task.text === value);
+        }),
+    }),
+    onSubmit: (values, { resetForm }) => {
+      if (isDuplicateTask(values.todo)) {
+        formik.setFieldError('todo', 'This task already exists');
+        return;
+      }
+      handleAdd();
+      resetForm();
+    },
+  });
+
+
+
+
   useEffect(() => {
     setFilteredTodos(todos); 
     localStorage.setItem('myTodo', JSON.stringify(todos));
@@ -39,6 +66,7 @@ const Todo = () => {
   useEffect(() => {
     handleSearch(); 
   }, [todos, searchValue]);
+
 
   const handleChange = (e) => {
     setSearchValue(e.target.value);
@@ -54,26 +82,17 @@ const Todo = () => {
   //     debouncedResults.cancel();
   //   };
   // });
-
-  function handleAdd() {
-    if (todo.trim() === '') {
-      toast.error('Please enter a valid task');
-      return;
-    }
-    if (isDuplicateTask(todo)) {
-      toast.error('This task already exists.');
-      return;
-    }
-
+ function handleAdd() {
     const newTask = {
-      text: todo,
+      text: formik.values.todo,
       status: false,
       created: new Date().toISOString(),
       modified: null,
     };
 
     setTodos([...todos, newTask]);
-    setTodo('');
+    formik.resetForm();
+  
   }
 
   function handleDelete(index) {
@@ -90,7 +109,7 @@ const Todo = () => {
 
   function handleSaveEdit() {
     if (editedTask.trim() === '') {
-      toast.error('Please enter a valid task');
+      // toast.error('Please enter a valid task');
       return;
     }
     const updatedTodos = todos.map((task, idx) =>
@@ -183,74 +202,70 @@ const Todo = () => {
       setFilteredTodos(filteredTasks);
     }
   }
-  
   return (
     <>
-      <div className='container'>
-        <input
-          type='text'
-          placeholder='Enter Your Task'
-          value={todo}
-          onChange={(e) => setTodo(e.target.value)}
-          onKeyUp={handleInputKeyUp}
-        />
-        <button className='Add-button' onClick={handleAdd}>Add
-        </button>
-      </div>
-      <div className='Search-box'>
+    <div className='container'>
+      <input
+        type='text'
+        placeholder='Enter Your Task'
+        value={todo}
+        onChange={(e) => setTodo(e.target.value)}
+        onKeyUp={handleInputKeyUp}
+      />
+      <button className='Add-button' onClick={handleAdd}>
+        Add
+      </button>
+    </div>
+    <div className='Search-box'>
       <input
         className='Search-input'
         type='text'
         placeholder='Search Task'
-        // value={searchValue}
-        onChange={debouncedResults} 
-        
+        onChange={debouncedResults}
       />
-    
-      <table className='list-container'>
-        <thead>
-          <tr>
-            <th className='header-cell'>Task</th>
-            <th className='header-cell'>Created</th>
-            <th className='header-cell'>Modified</th>
-            <th className='header-cell'>Status</th>
-            <th className='header-cell'>Action</th>
-          </tr>
-        </thead>
-        <tbody className='table-body'>
-          {filteredTodos.map((item, index) => (
-            <tr key={index}>
-              <td data-tip={item.text} data-full-tip={item.text}>
-                {item.text.slice(0, 19)}
-              </td>
-              <td>{new Date(item.created).toLocaleString()} </td>
-              <td>
-                {item.modified
-                  ? new Date(item.modified).toLocaleString()
-                  : new Date(item.created).toLocaleString()}
-              </td>
-              <td>{item.status ? 'Completed' : 'Pending'}</td>
-              <tr>
+      <div className='Table'>
+        <table className='list-container'>
+          <thead>
+            <tr>
+              <th className='header-cell'>Task</th>
+              <th className='header-cell'>Created</th>
+              <th className='header-cell'>Modified</th>
+              <th className='header-cell'>Status</th>
+              <th className='header-cell'>Action</th>
+            </tr>
+          </thead>
+          <tbody className='table-body'>
+            {filteredTodos.map((item, index) => (
+              <tr key={index}>
+                <td data-tip={item.text} data-full-tip={item.text}>
+                  {item.text.slice(0, 19)}
+                </td>
+                <td>{new Date(item.created).toLocaleString()} </td>
                 <td>
+                  {item.modified
+                    ? new Date(item.modified).toLocaleString()
+                    : new Date(item.created).toLocaleString()}
+                </td>
+                <td>{item.status ? 'Completed' : 'Pending'}</td>
+                <td style={
+                  { display: 'flex', justifyContent: 'space-around', alignItems: 'center'
+
+                 }
+                }>
                   <button className='delete-button' onClick={() => handleDelete(index)}>
                     Delete
                   </button>
-                </td>
-                <td>
                   <button className='edit-button' onClick={() => handleEdit(index)}>
                     Edit
                   </button>
-                </td>
-                <td>
                   <button className='toggle-button' onClick={() => toggleTaskStatus(index)}>
                     Change Status
                   </button>
                 </td>
               </tr>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+            ))}
+          </tbody>
+        </table>
       </div>
       {isEditModalOpen && (
         <div className='edit-modal'>
@@ -270,7 +285,7 @@ const Todo = () => {
             </select>
           </label>
           <div className='button-container'>
-            <button style={{ backgroundColor: ' #007bff' }} onClick={handleSaveEdit}>Save</button>
+            <button onClick={handleSaveEdit}>Save</button>
             <button style={{ backgroundColor: 'red' }} onClick={handleCancelEdit}>
               Cancel
             </button>
@@ -296,9 +311,8 @@ const Todo = () => {
         />
       )}
       <Tooltip place='right' type='dark' effect='solid' />
-    </>
+    </div>
+  </>
   );
 };
-
 export default Todo;
-
