@@ -1,13 +1,12 @@
-import React, { useEffect, useState , useMemo} from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useFormik } from 'formik';
-// import { ToastContainer, toast } from 'react-toastify';
-// import 'react-toastify/dist/ReactToastify.css';
 import './Todo.css';
 import { Tooltip } from 'react-tooltip';
 import Modal from './Model';
-import debouce from "lodash.debounce";
+import debouce from 'lodash.debounce';
 import userSchema from './Validation';
-import * as Yup from 'yup';
+import Pagination from './Pagination';
+// import * as Yup from 'yup';
 
 const Todo = () => {
   const [todo, setTodo] = useState('');
@@ -33,58 +32,73 @@ const Todo = () => {
   const [statusChangeIndex, setStatusChangeIndex] = useState(null);
   const [searchValue, setSearchValue] = useState('');
   const [filteredTodos, setFilteredTodos] = useState([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [postPerPage, setPostPerPage] = useState(5);
+
+  const IndexOflastPage = currentPage * postPerPage;
+  const IndexOfFirstpage = IndexOflastPage - postPerPage;
+  const Currentpost = todos.slice(IndexOfFirstpage, IndexOflastPage)
 
   const formik = useFormik({
     initialValues: {
       todo: '',
     },
-    validationSchema: Yup.object({
-      todo: Yup.string()
-        .required('Todo is required')
-        .test('is-unique', 'This task already exists', function (value) {
-          return !todos.some((task) => task.text === value);
-        }),
-    }),
-    onSubmit: (values, { resetForm }) => {
+    validationSchema: userSchema(todos),
+    onSubmit: (values) => {
       if (isDuplicateTask(values.todo)) {
         formik.setFieldError('todo', 'This task already exists');
         return;
       }
       handleAdd();
-      resetForm();
+
     },
   });
 
+  const formikEdit = useFormik({
+    initialValues: {
+      task: '',
+      status: 'false',
+    },
+    validationSchema: userSchema(todos),
+    onSubmit: (values) => {
+      if (isDuplicateTask(values.task)) {
+        formikEdit.setFieldError('task', 'This task already exists');
+        return;
+      }
+      handleSaveEdit(values);
+    },
 
-
+  });
 
   useEffect(() => {
-    setFilteredTodos(todos); 
+    setFilteredTodos(todos);
     localStorage.setItem('myTodo', JSON.stringify(todos));
   }, [todos]);
 
   useEffect(() => {
-    handleSearch(); 
+    handleSearch();
   }, [todos, searchValue]);
-
 
   const handleChange = (e) => {
     setSearchValue(e.target.value);
   };
 
 
-  const debouncedResults = useMemo(() => {
-    return debouce(handleChange, 300);
-  }, []);
-  
-  // useEffect(() => {
-  //   return () => {
-  //     debouncedResults.cancel();
-  //   };
-  // });
- function handleAdd() {
+  function handleAdd() {
+    const newTaskText = formik.values.todo.trim();
+    if (newTaskText === '') {
+      formik.setFieldError('todo', 'Todo is required');
+      return;
+    }
+
+    if (isDuplicateTask(newTaskText)) {
+      formik.setFieldError('todo', 'This task already exists');
+      return;
+    }
+
     const newTask = {
-      text: formik.values.todo,
+      text: newTaskText,
       status: false,
       created: new Date().toISOString(),
       modified: null,
@@ -92,53 +106,78 @@ const Todo = () => {
 
     setTodos([...todos, newTask]);
     formik.resetForm();
-  
   }
+
+  const debouncedResults = useMemo(() => {
+    return debouce(handleChange, 300);
+  }, []);
 
   function handleDelete(index) {
     setDeleteIndex(index);
     setDeleteModalOpen(true);
   }
 
+  // function handleEdit(index) {
+  //   openEditModal(index);
+  //   setEditedTask(todos[index].text);
+  //   setEditedStatus(todos[index].status ? 'true' : 'false');
+  //   setEditModalOpen(true);
+  // }
   function handleEdit(index) {
     openEditModal(index);
-    setEditedTask(todos[index].text);
-    setEditedStatus(todos[index].status ? 'true' : 'false');
+    const currentTask = todos[index];
+    formikEdit.setValues({
+      task: currentTask.text,
+      status: currentTask.status ? 'true' : 'false',
+    });
+
+    setEditIndex(index);
     setEditModalOpen(true);
   }
-
   function handleSaveEdit() {
-    if (editedTask.trim() === '') {
-      // toast.error('Please enter a valid task');
+    const editedTaskText = formikEdit.values.task.trim();
+
+    if (editedTaskText === '') {
+      formikEdit.setFieldError('task', 'Task cannot be empty');
       return;
     }
+
+    const isDuplicate = todos.some((task, idx) => {
+      return idx !== editIndex && task.text === editedTaskText;
+    });
+
+    if (isDuplicate) {
+      formikEdit.setFieldError('task', 'This task already exists');
+      return;
+    }
+
+
     const updatedTodos = todos.map((task, idx) =>
       idx === editIndex
         ? {
-            ...task,
-            text: editedTask,
-            status: editedStatus === 'true',
-            modified: new Date().toISOString(),
-          }
+          ...task,
+          text: editedTaskText,
+          status: formikEdit.values.status === 'true',
+          modified: new Date().toISOString(),
+        }
         : task
     );
+
     setTodos(updatedTodos);
     setEditIndex(null);
-    setEditedTask('');
-    setEditedStatus('false');
     setEditModalOpen(false);
   }
 
   function handleCancelEdit() {
     setEditIndex(null);
-    setEditedTask('');
-    setEditedStatus('false');
     setEditModalOpen(false);
   }
-
   const handleInputKeyUp = (event) => {
     if (event.key === 'Enter') {
-      handleAdd();
+      const trimmedValue = formik.values.todo.trim();
+      if (trimmedValue !== '') {
+        handleAdd();
+      }
     }
   }
 
@@ -156,10 +195,6 @@ const Todo = () => {
     setEditedTask(todos[index].text);
     setEditedStatus(todos[index].status ? 'true' : 'false');
     setEditModalOpen(true);
-  }
-
-  const closeEditModal = () => {
-    setEditModalOpen(false);
   }
 
   function handleConfirmDelete() {
@@ -186,15 +221,13 @@ const Todo = () => {
       setStatusChangeIndex(null);
     }
   }
-
-  function handleCancelStatusChange(){
+  function handleCancelStatusChange() {
     setStatusChangeModalOpen(false);
     setStatusChangeIndex(null);
   }
-
   function handleSearch() {
     if (searchValue === '') {
-      setFilteredTodos(todos);  
+      setFilteredTodos(todos);
     } else {
       const filteredTasks = todos.filter((task) =>
         task.text.toLowerCase().includes(searchValue.toLowerCase())
@@ -202,117 +235,153 @@ const Todo = () => {
       setFilteredTodos(filteredTasks);
     }
   }
+
   return (
     <>
-    <div className='container'>
-      <input
-        type='text'
-        placeholder='Enter Your Task'
-        value={todo}
-        onChange={(e) => setTodo(e.target.value)}
-        onKeyUp={handleInputKeyUp}
-      />
-      <button className='Add-button' onClick={handleAdd}>
-        Add
-      </button>
-    </div>
-    <div className='Search-box'>
-      <input
-        className='Search-input'
-        type='text'
-        placeholder='Search Task'
-        onChange={debouncedResults}
-      />
-      <div className='Table'>
-        <table className='list-container'>
-          <thead>
-            <tr>
-              <th className='header-cell'>Task</th>
-              <th className='header-cell'>Created</th>
-              <th className='header-cell'>Modified</th>
-              <th className='header-cell'>Status</th>
-              <th className='header-cell'>Action</th>
-            </tr>
-          </thead>
-          <tbody className='table-body'>
-            {filteredTodos.map((item, index) => (
-              <tr key={index}>
-                <td data-tip={item.text} data-full-tip={item.text}>
-                  {item.text.slice(0, 19)}
-                </td>
-                <td>{new Date(item.created).toLocaleString()} </td>
-                <td>
-                  {item.modified
-                    ? new Date(item.modified).toLocaleString()
-                    : new Date(item.created).toLocaleString()}
-                </td>
-                <td>{item.status ? 'Completed' : 'Pending'}</td>
-                <td style={
-                  { display: 'flex', justifyContent: 'space-around', alignItems: 'center'
-
-                 }
-                }>
-                  <button className='delete-button' onClick={() => handleDelete(index)}>
-                    Delete
-                  </button>
-                  <button className='edit-button' onClick={() => handleEdit(index)}>
-                    Edit
-                  </button>
-                  <button className='toggle-button' onClick={() => toggleTaskStatus(index)}>
-                    Change Status
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      {isEditModalOpen && (
-        <div className='edit-modal'>
-          <label>
-            <h3>Edit Task</h3>
-            <input type='text' value={editedTask} onChange={(e) => setEditedTask(e.target.value)} />
-          </label>
-          <label>
-            <h3>Status</h3>
-            <select
-              className='status'
-              value={editedStatus}
-              onChange={(e) => setEditedStatus(e.target.value)}
-            >
-              <option value='false'>Pending</option>
-              <option value='true'>Completed</option>
-            </select>
-          </label>
-          <div className='button-container'>
-            <button onClick={handleSaveEdit}>Save</button>
-            <button style={{ backgroundColor: 'red' }} onClick={handleCancelEdit}>
-              Cancel
+      <div className='container'>
+        <form onSubmit={formik.handleSubmit}>
+          <div className='input-field'>
+            <input
+              type='text'
+              className='Input-bar'
+              placeholder='Enter Your Task'
+              name='todo'
+              value={formik.values.todo}
+              onChange={formik.handleChange}
+              onKeyUp={handleInputKeyUp}
+              onBlur={formik.handleBlur}
+            />
+            <button className='Add-button' type="submit">
+              Add
             </button>
           </div>
+          {formik.errors.todo && formik.touched.todo && (
+            <div className="error">{formik.errors.todo}</div>
+          )}
+        </form>
+      </div>
+      <div className='Search-box'>
+        <input
+          className='Search-input'
+          type='text'
+          placeholder='Search Task'
+          onChange={debouncedResults}
+        />
+        <div className='Table'>
+          <table className='list-container'>
+            <thead>
+              <tr>
+                <th className='header-cell'>Task</th>
+                <th className='header-cell'>Created</th>
+                <th className='header-cell'>Modified</th>
+                <th className='header-cell'>Status</th>
+                <th className='header-cell'>Action</th>
+              </tr>
+            </thead>
+            <tbody className='table-body'>
+   
+              {Currentpost .map((item, index) => (
+                <tr key={index}>
+                  <td data-tip={item.text} data-full-tip={item.text}>
+                    {item.text.slice(0, 19)}
+                  </td>
+                  <td>{new Date(item.created).toLocaleString()} </td>
+                  <td>
+                    {item.modified
+                      ? new Date(item.modified).toLocaleString()
+                      : new Date(item.created).toLocaleString()}
+                  </td>
+                  <td>{item.status ? 'Completed' : 'Pending'}</td>
+                  <td style={{
+                    display: 'flex',
+                    justifyContent: 'space-around',
+                    alignItems: 'center',
+                  }}>
+                    <button className='delete-button' onClick={() => handleDelete(index)}>
+                      Delete
+                    </button>
+                    <button className='edit-button' onClick={() => handleEdit(index)}>
+                      Edit
+                    </button>
+                    <button className='toggle-button' onClick={() => toggleTaskStatus(index)}>
+                      Change Status
+                    </button>
+                  </td>
+                </tr>
+              ))}
+
+            </tbody>
+          </table>
+          <Pagination
+        postPerPage={postPerPage}
+        totalPage={todos.length}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+      />
         </div>
-      )}
-      {deleteModalOpen && (
-        <Modal
-          isOpen={deleteModalOpen}
-          onClose={handleConfirmCancel}
-          onConfirm={handleConfirmDelete}
-          title='Delete Task'
-          message='Are you sure you want to delete this task?'
-        />
-      )}
-      {isStatusChangeModalOpen && (
-        <Modal
-          isOpen={isStatusChangeModalOpen}
-          onClose={handleCancelStatusChange}
-          onConfirm={handleConfirmStatusChange}
-          title='Change Status'
-          message='Are you sure you want to change the status of this task?'
-        />
-      )}
-      <Tooltip place='right' type='dark' effect='solid' />
-    </div>
-  </>
+        {isEditModalOpen && (
+          <div className='edit-modal'>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              handleSaveEdit();
+            }}>
+              <label>
+                <h3>Edit Task</h3>
+                <input
+                  type='text'
+                  name='task'
+                  value={formikEdit.values.task}
+                  onChange={formikEdit.handleChange}
+                  onKeyUp={handleInputKeyUp}
+                  onBlur={formikEdit.handleBlur}
+                />
+                {formikEdit.errors.task && formikEdit.touched.task && (
+                  <div className="error">{formikEdit.errors.task}</div>
+                )}
+              </label>
+              <label>
+                <h3>Status</h3>
+                <select
+                  className='status'
+                  name='status'
+                  value={formikEdit.values.status}
+                  onChange={formikEdit.handleChange}
+                >
+                  <option value='false'>Pending</option>
+                  <option value='true'>Completed</option>
+                </select>
+              </label>
+              <div className='button-container'>
+                <button type="submit">Save</button>
+                <button style={{ backgroundColor: 'red' }} onClick={handleCancelEdit}>
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+        {deleteModalOpen && (
+          <Modal
+            isOpen={deleteModalOpen}
+            onClose={handleConfirmCancel}
+            onConfirm={handleConfirmDelete}
+            title='Delete Task'
+            message='Are you sure you want to delete this task?'
+          />
+        )}
+        {isStatusChangeModalOpen && (
+          <Modal
+            isOpen={isStatusChangeModalOpen}
+            onClose={handleCancelStatusChange}
+            onConfirm={handleConfirmStatusChange}
+            title='Change Status'
+            message='Are you sure you want to change the status of this task?'
+          />
+        )}
+        <Tooltip place='right' type='dark' effect='solid' />
+      </div>
+    </>
   );
 };
+
 export default Todo;
