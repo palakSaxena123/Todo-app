@@ -4,7 +4,6 @@ const Modal = ({ isOpen, onClose, onConfirm, title, message }) => {
   if (!isOpen) return null;
 
   return (
-   
     <div className="model">
       <label className='model-label'>
         <h3>{title}</h3>

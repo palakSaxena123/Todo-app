@@ -14,5 +14,4 @@ const Search = ({ onChange }) => {
     </div>
   );
 };
-
 export default Search;

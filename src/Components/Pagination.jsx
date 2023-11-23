@@ -3,7 +3,6 @@ import './Pagination.css';
 
 const Pagination = ({ postPerPage, totalPage, currentPage, setCurrentPage }) => {
 
-
   return (
     <>
       <div className='pagination-container'>

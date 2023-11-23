@@ -3,7 +3,7 @@ import EditModal from './EditModal';
 import Modal from './Model';
 import Archive from './Archive';
 
-const TasksModal = ({ formik,
+const TasksModal = ({ 
     formikEdit,
     handleInputKeyUp,
     handleSaveEdit,
