@@ -5,15 +5,11 @@ import { Outlet, Link } from "react-router-dom";
 const Home = () => {
   return (
     <>
-
     <div className='home-container'>
         <h1 >Welcome</h1>
         <nav>
           <button className='button type-1'>
-         
-        <Link className="btn-txt" to="/todo">Let's Start</Link>
-
-
+           <Link className="btn-txt" to="/todo">Let's Start</Link>
         </button>
         </nav>
         <Outlet />

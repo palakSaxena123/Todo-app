@@ -5,7 +5,6 @@ import Todo from './Components/Todo';
 import Home from './Components/Home';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-
 function App() {
    return (
       <BrowserRouter>
@@ -16,7 +15,7 @@ function App() {
 
          </Routes>
       </BrowserRouter>
-
+     
    )
 }
 

@@ -11,12 +11,10 @@ const Modal = ({ isOpen, onClose, onConfirm, title, message }) => {
         <p>{message}</p>
         </label>
         <div className='btns'>
-          <button style={{backgroundColor:"#007bff"}} onClick={onConfirm}>Confirm</button>
-          <button className='deleteCancel' onClick={onClose}>Cancel</button>
+          <button style={{backgroundColor:"#007bff",color:"white" ,padding: "8px 12px",border:"none"}} onClick={onConfirm}>Confirm</button>
+          <button style={{color:"white", padding: "8px 12px",border:"none"}}className='deleteCancel' onClick={onClose}>Cancel</button>
         </div>
       </div>
-   
   );
 };
-
 export default Modal;

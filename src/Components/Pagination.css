@@ -1,0 +1,13 @@
+.pagination-container button {
+    margin: 5px;
+    padding: 8px;
+  }
+  
+  .pagination-container button.disabled {
+    color: gray;
+    background-color: gainsboro;
+  }
+  
+  .pagination-container button.active {
+    font-weight: bold;
+  }
