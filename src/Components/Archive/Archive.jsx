@@ -1,5 +1,6 @@
 import React from 'react';
 import { RxCross2 } from "react-icons/rx";
+import "../Archive/archive.css";
 
 const Archive = ({ archivedTasks, onClose }) => {
   return (

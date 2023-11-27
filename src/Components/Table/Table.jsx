@@ -1,6 +1,7 @@
 import React from 'react';
-import TaskItem from './TaskItem';
-import Pagination from './Pagination';
+import TaskItem from '../TaskItem/TaskItem';
+import Pagination from '../Pagination/Pagination';
+import "../Table/table.css";
 
 const Table = ({ todos, Currentposts, postPerPage, currentPage, setCurrentPage, handleDelete, handleEdit, handleArchive, toggleTaskStatus }) => {
   return (

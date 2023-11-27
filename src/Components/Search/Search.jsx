@@ -1,5 +1,6 @@
 import React from 'react';
 import debouce from 'lodash.debounce';
+import "../Search/Search.css";
 
 const Search = ({ onChange }) => {
   const debouncedChange = debouce(onChange, 300);

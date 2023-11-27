@@ -1,0 +1,61 @@
+.archiev-container{
+    margin-left: 200px;
+    margin-bottom: 50px;
+    width: 25px;
+    height: 30px;
+  }
+  .archive-container {
+    position: relative;
+    margin-left: 72%;
+    top: 30px;
+  }
+  
+  .archived-count {
+    position: absolute;
+    top: -5px;
+    right: 30px;
+    background-color: red;
+    color: white;
+    border-radius: 50%;
+    padding: 5px 8px;
+    font-size: 7px;
+    font-weight: bold;
+  }
+  .archive-model {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    text-align: center;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+    padding: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    max-width: 400px;
+    width: 50%;
+    margin-left: 33%;
+   top: 45%;
+   height: 330px;
+    overflow-x: hidden;
+    overflow-y: scroll;
+  }
+  
+  .archive-model label {
+    display: block;
+    align-items: center;
+    margin-bottom: 10px;
+    gap: 25px;
+  }
+  
+  .archive-model button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  
+  .archive-model button:hover {
+    background-color: #0056b3;
+  }

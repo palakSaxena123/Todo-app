@@ -1,7 +1,7 @@
 import React from 'react';
 import EditModal from './EditModal';
 import Modal from './Model';
-import Archive from './Archive';
+import Archive from '../Archive/Archive';
 
 const TasksModal = ({ 
     formikEdit,

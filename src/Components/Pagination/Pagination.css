@@ -1,0 +1,33 @@
+.pagination-container button {
+    margin: 5px;
+    padding: 8px;
+  }
+  
+  .pagination-container button.disabled {
+    color: gray;
+    background-color: gainsboro;
+  }
+  
+  .pagination-container button.active {
+    font-weight: bold;
+  }
+  /* .pagination-container{
+    display: flex;
+   gap: 40px;
+   justify-content: space-between;
+   margin-bottom: 10PX;
+   text-transform: capitalize;
+  
+  }
+  .pagination-container button{
+    padding: 10px;
+    border-radius: 20px;
+    width: 90px;
+    font-weight: 700;
+    font: 14px/1.5 times new roman;
+    text-decoration: none;
+  }
+  .pagination-container button:hover{
+    background-color: red;
+  
+  } */

@@ -1,14 +1,13 @@
 import React, { useEffect, useState} from 'react';
-import { useFormik } from 'formik';
-import './Todo.css';
+import "../Todo/Todo.css";
 import { Tooltip } from 'react-tooltip';
-import userSchema from './Validation';
 import { BiArchiveIn } from "react-icons/bi";
-import {getLocalData} from "../util/util"
-import Table from './Table';
-import Search from './Search';
-import AddTask from './AddTask';
-import TasksModal from './TasksModal';
+import {getLocalData} from "../../util/util";
+import Table from "../Table/Table";
+import Search from '../Search/Search';
+import TasksModal from '../Model/TasksModal';
+import {FormikData} from '../Form/FormModel';
+import AddTodo from '../button/AddTodo';
 
 const Todo = () => {
   const [state, setState] = useState({
@@ -35,38 +34,9 @@ const Todo = () => {
   const {
     todos,editIndex,isEditModalOpen,deleteIndex,deleteModalOpen,isStatusChangeModalOpen,statusChangeIndex,searchValue,filteredTodos,
     currentPage,postPerPage,showArchive,archivedTasks,archivedModelOpen } = state;
-
   const IndexOflastPage = currentPage * postPerPage;
   const IndexOfFirstpage = IndexOflastPage - postPerPage;
   const Currentposts = filteredTodos.slice(IndexOfFirstpage, IndexOflastPage);
-
-  const formik = useFormik({
-    initialValues: {
-      todo: '',
-    },
-    validationSchema: userSchema(todos),
-    onSubmit: (values) => {
-      if (isDuplicateTask(values.todo)) {
-        formik.setFieldError('todo', 'This task already exists');
-        return;
-      }
-      handleAdd();
-    },
-  });
-  const formikEdit = useFormik({
-    initialValues: {
-      task: '',
-      status: 'false',
-    },
-    validationSchema: userSchema(todos),
-    onSubmit: (values) => {
-      if (isDuplicateTask(values.task)) {
-        formikEdit.setFieldError('task', 'This task already exists');
-        return;
-      }
-      handleSaveEdit(values);
-    },
-  });
   useEffect(() => {
     setState((prevState) => ({
       ...prevState,
@@ -88,11 +58,13 @@ const Todo = () => {
  
   function handleAdd() {
     const newTaskText = formik.values.todo.trim();
+  
     if (newTaskText === '') {
       formik.setFieldError('todo', 'Todo is required');
       return;
     }
     if (isDuplicateTask(newTaskText)) {
+      console.log('Duplicate Task:', newTaskText);
       formik.setFieldError('todo', 'This task already exists');
       return;
     }
@@ -183,6 +155,7 @@ const Todo = () => {
   const isDuplicateTask = (taskText) => {
     return todos.some((item) => item.text === taskText);
   }
+  
   const openEditModal = (index) => {
     setState((prevState)=>({
       ...prevState,
@@ -240,7 +213,6 @@ const Todo = () => {
         const filteredTasks = prevState.todos.filter((task) =>
           task.text.toLowerCase().includes(prevState.searchValue.toLowerCase())
         );
-  
         return {
           ...prevState,
           filteredTodos: filteredTasks,
@@ -248,11 +220,10 @@ const Todo = () => {
       }
     });
   }
-  
   function handleArchive(index) {
     setState((prevState) => {
       const updatedTodos = [...prevState.todos];
-      const archivedTask = updatedTodos.splice(prevState.IndexOfFirstpage + index, 1)[0];
+      const archivedTask = updatedTodos.splice(index, 1)[0];
       return {
         ...prevState,
         todos: updatedTodos,
@@ -261,11 +232,9 @@ const Todo = () => {
       };
     }, archiveLocalStorageData);
   }
-  
   const archiveLocalStorageData = () => {
     localStorage.setItem('archivedTasks', JSON.stringify(archivedTasks));
   };
-
   useEffect(() => {
     const archiveTask = localStorage.getItem('archivedTasks');
     if (archiveTask) {
@@ -276,7 +245,6 @@ const Todo = () => {
       }));
     }
   }, []);
-  
   function addToArchive() {
     setState((prevState)=>({
       ...prevState,
@@ -286,17 +254,16 @@ const Todo = () => {
   const handlePageChange = (page) => {
     setState((prevState) => ({ ...prevState, currentPage: page }));
   };
+  const { todoFormik: formik, editFormik: formikEdit } = FormikData(todos, isDuplicateTask, handleAdd, handleSaveEdit);
   return (
     <>
-       <div className='container'>
-       <AddTask formik={formik} handleInputKeyUp={handleInputKeyUp} handleAdd={handleAdd} />
-         <div className='archive-container'>
+       <div className='archive-container'>
         <BiArchiveIn style={{ marginLeft: "300px", marginBottom: "90px", width: "20px", height: "30px" }} onClick={addToArchive} />
           {showArchive > 0 && (
             <span className="archived-count">{showArchive}</span>
           )}
         </div>
-      </div>
+        <AddTodo/>
         <Search onChange={handleSearchChange} />
         <Table
         todos={todos}
@@ -304,6 +271,7 @@ const Todo = () => {
         postPerPage={postPerPage}
         currentPage={currentPage}
         setCurrentPage={handlePageChange}
+        handleAdd = {handleAdd}
         handleDelete={handleDelete}
         handleEdit={handleEdit}
         handleArchive={handleArchive}

@@ -15,7 +15,7 @@ html, body {
   height: 600px; 
   gap: 27px;
   margin-bottom: 30px;
-  background-image: url('../Components/images/notebook-image.avif');
+  background-image: url('../images/notebook-image.avif');
   background-size: 100% 100%;
   background-position: top center;
   background-repeat: no-repeat;
@@ -28,7 +28,6 @@ html, body {
 .home-btn:hover {
   background-color: aliceblue;
 }
-
 a {
     color: black;
 }
@@ -53,7 +52,7 @@ a {
     font-size: large;
     font-family: serif;
   }
-  
+
   .type1::after {
     content: "";
     position: absolute;

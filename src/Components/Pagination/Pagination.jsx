@@ -2,6 +2,11 @@ import React from 'react';
 import './Pagination.css';
 
 const Pagination = ({ postPerPage, totalPage, currentPage, setCurrentPage }) => {
+  const showPagination = totalPage > 0;
+
+  if (!showPagination) {
+    return null;
+  }
 
   return (
     <>

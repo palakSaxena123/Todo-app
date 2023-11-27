@@ -1,0 +1,42 @@
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 auto;
+    border: 1px solid #ccc;
+    margin-bottom: 2px;
+  }
+  th, td {
+    padding: 10px;
+    border: 1px solid #ccc;
+    text-align: center;
+  }
+  
+  th {
+    background-color: rgb(249, 85, 118);
+    color: #fff;
+    text-align: left;
+  }
+  
+  tr:hover {
+    background-color: #ddd;
+  }
+  
+  
+  th.header-cell {
+    text-align: center;
+  }
+  
+  .status-text{
+    margin-right: 10px;
+  
+  }
+  table td  {
+    padding: 3px;
+    text-align: center;
+    overflow: hidden;
+  }
+  .Table{
+    height: 330px;
+    overflow-x: hidden;
+    overflow-y: scroll;
+  }

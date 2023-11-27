@@ -5,9 +5,9 @@ const userSchema = (todos) => {
     todo: string()
       .required('Todo is required')
       .test('is-unique', 'This task already exists', function (value) {
-        return !todos.some((task) => task.text === value);
+        return !todos?.some((task) => task.text === value);
       }),
   });
 };
 
-export default userSchema;
+export { userSchema };

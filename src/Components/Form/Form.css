@@ -1,0 +1,28 @@
+
+.input-field{
+    display: flex;
+    gap : 10px;
+    margin-top: 200px;
+    margin-left: 25%;
+}
+input {
+    width: 390px;
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+.Add-button{
+    width: 100px;
+    height: 39px;
+    background-color: #3f72ce;
+    color: white;
+    margin-top: 1px;
+    border:none;
+    cursor: pointer;
+  }
+  .error {
+    color: red;
+    font-size: 14px;
+    margin-top: 4px;
+    margin-left: 25%;
+  }
+
