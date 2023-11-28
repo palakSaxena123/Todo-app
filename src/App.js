@@ -3,9 +3,10 @@ import React, { useState } from 'react';
 // import 'react-toastify/dist/ReactToastify.css';
 import Todo from "../src/Components/Todo/Todo";
  import Home from "../src/Components/Home/Home";
- import Form from './Components/Form/Form';
+//  import Form from './Components/Form/Form';
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import FormModel from './Components/Form/FormModel';
 
 function App() {
    return (
@@ -14,7 +15,7 @@ function App() {
          <Routes>
             <Route path="/" element={<Home/>} />
             <Route path='/todo' element ={<Todo/>}/>
-           <Route path='/todo/add'  element={<Form/>}/>
+           <Route path='/todo/add'  element={<FormModel/>}/>
          </Routes>
       </BrowserRouter>
    )

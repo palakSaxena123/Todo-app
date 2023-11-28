@@ -1,35 +1,36 @@
 import React from 'react';
-import { FormikData } from "./FormModel";
 import "../Form/Form.css";
 
-const Form = ({ isDuplicateTask, handleAdd }) => {
-  const { todoFormik, handleInputKeyUp } = FormikData(isDuplicateTask, handleAdd);
-
+const TodoForm = ({ values, handleChange, handleSubmit}) => {
+  // console.log(values);
 
   return (
     <>
-      <form onSubmit={todoFormik.handleSubmit}>
+      <form onSubmit={handleSubmit}>
         <div className="input-field">
           <input
             type="text"
             className="Input-bar"
             placeholder="Enter Your Task"
             name="todo"
-            value={todoFormik.values.todo}
-            onChange={todoFormik.handleChange}
-            onKeyUp={handleInputKeyUp}
-            onBlur={todoFormik.handleBlur}
+             value={values?.todo}
+            onChange={handleChange}
+            // onKeyUp={handleInputKeyUp}
+            // onBlur={handleBlur}
           />
-          <button className="Add-button"  type='submit'>
+          <button className="Add-button" type='submit'>
             Add
           </button>
         </div>
-        {todoFormik.errors.todo && todoFormik.touched.todo && (
+
+        <div>
+        <p>Current Value: {values.todo}</p>
+      </div>
+        {/* {todoFormik.errors.todo && todoFormik.touched.todo && (
           <div className="error">{todoFormik.errors.todo}</div>
-        )}
+        )} */}
       </form>
     </>
   );
 }
-
-export default Form;
+export default TodoForm;

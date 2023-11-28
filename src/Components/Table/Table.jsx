@@ -17,7 +17,18 @@ const Table = ({ todos, Currentposts, postPerPage, currentPage, setCurrentPage, 
           </tr>
         </thead>
         <tbody className='table-body'>
-          {Currentposts.map((item, index) => (
+        {todos.map((item,index)=>(
+        <div key={index}>{item.text}
+                <li>{item.status}</li>
+        <li>{item.created}</li>
+        <li>{item.modified}</li>
+
+        </div>
+
+      ))}
+
+
+          {/* {Currentposts.map((item, index) => (
             <TaskItem
               key={index}
               task={item}
@@ -26,8 +37,8 @@ const Table = ({ todos, Currentposts, postPerPage, currentPage, setCurrentPage, 
               handleEdit={handleEdit}
               handleArchive={handleArchive}
               toggleTaskStatus={toggleTaskStatus}
-            />
-          ))}
+            /> */}
+          {/* ))} */}
         </tbody>
       </table>
       <Pagination

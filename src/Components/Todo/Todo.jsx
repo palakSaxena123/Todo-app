@@ -6,7 +6,7 @@ import {getLocalData} from "../../util/util";
 import Table from "../Table/Table";
 import Search from '../Search/Search';
 import TasksModal from '../Model/TasksModal';
-import {FormikData} from '../Form/FormModel';
+import FormModel from '../Form/FormModel';
 import AddTodo from '../button/AddTodo';
 
 const Todo = () => {
@@ -37,6 +37,7 @@ const Todo = () => {
   const IndexOflastPage = currentPage * postPerPage;
   const IndexOfFirstpage = IndexOflastPage - postPerPage;
   const Currentposts = filteredTodos.slice(IndexOfFirstpage, IndexOflastPage);
+
   useEffect(() => {
     setState((prevState) => ({
       ...prevState,
@@ -55,32 +56,6 @@ const Todo = () => {
     searchValue: value,
   }));
   };
- 
-  function handleAdd() {
-    const newTaskText = formik.values.todo.trim();
-  
-    if (newTaskText === '') {
-      formik.setFieldError('todo', 'Todo is required');
-      return;
-    }
-    if (isDuplicateTask(newTaskText)) {
-      console.log('Duplicate Task:', newTaskText);
-      formik.setFieldError('todo', 'This task already exists');
-      return;
-    }
-    const newTask = {
-      text: newTaskText,
-      status: false,
-      created: new Date().toISOString(),
-      modified: false,
-    };
-    setState((prevState) => ({
-      ...prevState,
-      todos: [...prevState.todos, newTask],
-    }));
-    formik.resetForm();
-  };
-
   function handleDelete(indexonPage) {
     const index = IndexOfFirstpage + indexonPage;
     setState((prevState)=>({
@@ -138,12 +113,6 @@ const Todo = () => {
       isEditModalOpen : false
     }))
   }
-  const handleInputKeyUp = (event) => {
-    if (event.key === 'Enter') {
-      const trimmedValue = formik.values.todo.trim();
-      if (trimmedValue !== '') {
-        handleAdd();
-   }}}
   function toggleTaskStatus(ToggleId) {
     const index = IndexOfFirstpage + ToggleId;
     setState((prevState)=>({
@@ -152,9 +121,9 @@ const Todo = () => {
       isStatusChangeModalOpen : true
     }))
   }
-  const isDuplicateTask = (taskText) => {
-    return todos.some((item) => item.text === taskText);
-  }
+  // const isDuplicateTask = (taskText) => {
+  //   return todos.some((item) => item.text === taskText);
+  // }
   
   const openEditModal = (index) => {
     setState((prevState)=>({
@@ -254,7 +223,7 @@ const Todo = () => {
   const handlePageChange = (page) => {
     setState((prevState) => ({ ...prevState, currentPage: page }));
   };
-  const { todoFormik: formik, editFormik: formikEdit } = FormikData(todos, isDuplicateTask, handleAdd, handleSaveEdit);
+  const { todoFormik: formik, editFormik: formikEdit } = FormModel(todos, handleSaveEdit);
   return (
     <>
        <div className='archive-container'>
@@ -265,13 +234,14 @@ const Todo = () => {
         </div>
         <AddTodo/>
         <Search onChange={handleSearchChange} />
+     
         <Table
         todos={todos}
         Currentposts={Currentposts}
         postPerPage={postPerPage}
         currentPage={currentPage}
         setCurrentPage={handlePageChange}
-        handleAdd = {handleAdd}
+        // handleAdd = {handleAdd}
         handleDelete={handleDelete}
         handleEdit={handleEdit}
         handleArchive={handleArchive}
@@ -279,7 +249,7 @@ const Todo = () => {
       />      
       <TasksModal
         formikEdit={formikEdit}
-        handleInputKeyUp={handleInputKeyUp}
+        // handleInputKeyUp={handleInputKeyUp}
         handleDelete={handleDelete}
         handleSaveEdit={handleSaveEdit}
         handleCancelEdit={handleCancelEdit}

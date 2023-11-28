@@ -1,34 +1,77 @@
 import { useFormik } from 'formik';
-import {userSchema} from "../Validation/Validation";
+import { useState } from 'react';
+// import {userSchema} from "../Validation/Validation";
+import TodoForm from './Form';
 
-export const FormikData = (todos, handleAdd, handleSaveEdit) => {
+ const FormModel = () => {
+  const [todos, setTodos] = useState([]);
+
+  const addTaskToList = (newTask) => {
+    setTodos([...todos, newTask]);
+  };
+
+  function handleAdd(values) {
+    console.log(values)
+
+    const newTask = {
+      text: values.todo,
+      status: false,
+      created: new Date().toISOString(),
+      modified: false,
+    };
+    addTaskToList(newTask);
+    // formik.resetForm();
+  };
+  // const handleInputKeyUp = (event) => {
+  //   if (event.key === 'Enter') {
+  //     const trimmedValue = formik.values.todo.trim();
+  //     console.log(trimmedValue);
+  //     if (trimmedValue !== '') {
+  //       handleAdd();
+  //  }}}
   
-  const todoFormik = useFormik({
+  const formik = useFormik({
     initialValues: {
       todo: '',
     },
-    validationSchema: userSchema(todos),
-    onSubmit: async (values, {  resetForm }) => {
-      handleAdd(values.todo);
-      resetForm();
+  
+     onSubmit: (values) => {
+      console.log(values);
+      handleAdd(values);
     },
   });
 
-  const editFormik = useFormik({
-    initialValues: {
-      task: '',
-      status: 'false',
-    },
-    validationSchema: userSchema(todos),
-    onSubmit: (values) => {
-      if (todos.some((task) => task.text === values.task)) {
-        editFormik.setFieldError('task', 'This task already exists');
-        return;
-      }
-      handleSaveEdit(values);
-      editFormik.resetForm();
-    },
-  });
+  // const editFormik = useFormik({
+  //   initialValues: {
+  //     task: '',
+  //     status: 'false',
+  //   },
+  //   validationSchema: userSchema(todos),
+  //   onSubmit: (values) => {
+  //     if (isDuplicateTask(values.task)) {
+  //       editFormik.setFieldError('task', 'This task already exists');
+  //       return;
+  //     }
+  //     handleSaveEdit(values);
+  //   },
+  // })
 
-  return { todoFormik, editFormik };
+  return (
+    <>
+
+     <TodoForm {...formik}/>
+      {todos.map((item,index)=>(
+        <div key={index}>{item.text}
+        
+        <li>{item.created}</li>
+        <li>{item.modified}</li>
+
+        </div>
+
+      ))}
+
+    </>
+  )
 };
+export default FormModel;
+
